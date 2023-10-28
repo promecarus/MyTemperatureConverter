@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -32,14 +33,16 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
                 ) {
-                    StatefulTemperatureInput()
+                    Column {
+                        StatefulTemperatureInput()
+                        ConverterApp()
+                    }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StatefulTemperatureInput(
     modifier: Modifier = Modifier,
@@ -51,7 +54,7 @@ fun StatefulTemperatureInput(
             text = stringResource(R.string.stateful_converter),
             style = MaterialTheme.typography.headlineSmall
         )
-        OutlinedTextField(
+        @OptIn(ExperimentalMaterial3Api::class) OutlinedTextField(
             value = input,
             label = { Text(stringResource(R.string.enter_celsius)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -59,6 +62,42 @@ fun StatefulTemperatureInput(
                 input = it
                 output = convertToFahrenheit(input)
             },
+        )
+        Text(stringResource(R.string.temperature_fahrenheit, output))
+    }
+}
+
+@Composable
+private fun ConverterApp(
+    modifier: Modifier = Modifier,
+) {
+    var input by remember { mutableStateOf("") }
+    var output by remember { mutableStateOf("") }
+    Column(modifier) {
+        StatelessTemperatureInput(input = input, output = output, onValueChange = {
+            input = it
+            output = convertToFahrenheit(it)
+        })
+    }
+}
+
+@Composable
+fun StatelessTemperatureInput(
+    input: String,
+    output: String,
+    onValueChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier.padding(16.dp)) {
+        Text(
+            text = stringResource(R.string.stateless_converter),
+            style = MaterialTheme.typography.headlineSmall
+        )
+        @OptIn(ExperimentalMaterial3Api::class) OutlinedTextField(
+            value = input,
+            label = { Text(stringResource(R.string.enter_celsius)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            onValueChange = onValueChange,
         )
         Text(stringResource(R.string.temperature_fahrenheit, output))
     }
